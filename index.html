@@ -1,0 +1,59 @@
+
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+  <meta charset="UTF-8">
+  <title>Prijava v Igre</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding-top: 50px; }
+    #loading { display: none; margin-top: 20px; }
+    .spinner {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #3498db;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js"></script>
+  <script src="firebase-config.js"></script>
+</head>
+<body>
+  <h1>Prijava v Igre</h1>
+  <button onclick="signInWithGoogle()">Prijava z Google računom</button>
+  <div id="loading">
+    <p>Prijavljam...</p>
+    <div class="spinner"></div>
+  </div>
+
+  <script>
+    const auth = firebase.auth();
+
+    function signInWithGoogle() {
+      document.getElementById('loading').style.display = 'block';
+
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+      .then((result) => {
+        return result.user.getIdToken();
+      })
+      .then((idToken) => {
+        localStorage.setItem('firebaseToken', idToken);
+        window.location.href = "https://sites.google.com/view/tisahomes"; // Updated redirect
+      })
+      .catch((error) => {
+        document.getElementById('loading').style.display = 'none';
+        console.error(error);
+        alert("Napaka pri prijavi: " + error.message);
+      });
+    }
+  </script>
+</body>
+</html>
