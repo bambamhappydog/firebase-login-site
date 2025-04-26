@@ -5,8 +5,20 @@
   <meta charset="UTF-8">
   <title>Prijava v Igre</title>
   <style>
-    body { font-family: sans-serif; text-align: center; padding-top: 50px; }
+    body { font-family: sans-serif; text-align: center; padding-top: 40px; }
+    form { margin-top: 20px; }
+    input { margin: 5px; padding: 8px; width: 200px; }
+    button { padding: 8px 16px; margin: 10px; cursor: pointer; }
+    .google-btn {
+      background-color: white;
+      border: 1px solid #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
     #loading { display: none; margin-top: 20px; }
+    #errorMessage { color: red; margin-top: 20px; }
     .spinner {
       border: 6px solid #f3f3f3;
       border-top: 6px solid #3498db;
@@ -16,22 +28,34 @@
       animation: spin 1s linear infinite;
       display: inline-block;
     }
-    #errorMessage { color: red; margin-top: 20px; }
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
   </style>
-  <!-- Uporabimo Firebase CDN za brskalnik (verzija 8.10.1) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="firebase-config.js"></script>
 </head>
 <body>
   <h1>Prijava v Igre</h1>
-  <button onclick="signInWithGoogle()">Prijava z Google računom</button>
+
+  <!-- Gumb za Google prijavo -->
+  <button class="google-btn" onclick="signInWithGoogle()">
+    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo" width="20" height="20">
+    Prijava z Google računom
+  </button>
+
+  <form onsubmit="return signInWithEmail();">
+    <h3>Ali se prijavi z e-pošto</h3>
+    <input type="email" id="email" placeholder="E-pošta" required><br>
+    <input type="password" id="password" placeholder="Geslo" required><br>
+    <button type="submit">Prijava z e-pošto</button>
+    <button type="button" onclick="registerWithEmail()">Registracija</button>
+  </form>
+
   <div id="loading">
-    <p>Prijavljam...</p>
+    <p>Obdelujem...</p>
     <div class="spinner"></div>
   </div>
   <div id="errorMessage"></div>
@@ -45,22 +69,44 @@
 
     function signInWithGoogle() {
       document.getElementById('loading').style.display = 'block';
-      console.log("🔐 Začenjam prijavo z Google...");
-
       const provider = new firebase.auth.GoogleAuthProvider();
       firebase.auth().signInWithPopup(provider)
-        .then((result) => {
-          console.log("✅ Prijava uspela. Pridobivam ID token...");
-          return result.user.getIdToken();
-        })
+        .then((result) => result.user.getIdToken())
         .then((idToken) => {
-          console.log("✅ Token prejet.");
           localStorage.setItem('firebaseToken', idToken);
-          window.location.href = "https://sites.google.com/view/tisahomes"; // Redirect po prijavi
+          window.location.href = "https://sites.google.com/view/tisahomes";
         })
-        .catch((error) => {
-          showError("Napaka pri prijavi: " + error.message);
-        });
+        .catch((error) => showError("Napaka pri prijavi (Google): " + error.message));
+    }
+
+    function signInWithEmail() {
+      document.getElementById('loading').style.display = 'block';
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      firebase.auth().signInWithEmailAndPassword(email, password)
+        .then((result) => result.user.getIdToken())
+        .then((idToken) => {
+          localStorage.setItem('firebaseToken', idToken);
+          window.location.href = "https://sites.google.com/view/tisahomes";
+        })
+        .catch((error) => showError("Napaka pri prijavi (email): " + error.message));
+
+      return false;
+    }
+
+    function registerWithEmail() {
+      document.getElementById('loading').style.display = 'block';
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      firebase.auth().createUserWithEmailAndPassword(email, password)
+        .then((result) => result.user.getIdToken())
+        .then((idToken) => {
+          localStorage.setItem('firebaseToken', idToken);
+          window.location.href = "https://sites.google.com/view/tisahomes";
+        })
+        .catch((error) => showError("Napaka pri registraciji: " + error.message));
     }
   </script>
 </body>
