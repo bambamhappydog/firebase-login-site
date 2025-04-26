@@ -54,6 +54,9 @@
     <button type="button" onclick="registerWithEmail()">Registracija</button>
   </form>
 
+  <!-- Dodan Odjava gumb -->
+  <button onclick="logout()">Odjava</button>
+
   <div id="loading">
     <p>Obdelujem...</p>
     <div class="spinner"></div>
@@ -107,6 +110,16 @@
           window.location.href = "https://sites.google.com/view/tisahomes";
         })
         .catch((error) => showError("Napaka pri registraciji: " + error.message));
+    }
+
+    function logout() {
+      firebase.auth().signOut()
+        .then(() => {
+          console.log("✅ Uporabnik odjavljen.");
+          localStorage.removeItem('firebaseToken');
+          window.location.href = "https://bambamhappydog.github.io/firebase-login-site/";
+        })
+        .catch((error) => showError("Napaka pri odjavi: " + error.message));
     }
   </script>
 </body>
